@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Config file for the game -->
+
+<config>
+  <name>My spuer awesome game with XML</name>
+  <window>
+    <vsync value ="false"/>
+    <mesures width ="1024" height ="768" scale ="1"/>
+    <FULLSCREEN value ="false"/>
+    <BORDERLESS value ="false"/>
+    <RESIZEABLE value ="true"/>
+    <FULLSCREEN_WINDOW value ="false"/>
+  </window>
+</config>
