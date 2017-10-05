@@ -135,7 +135,18 @@ bool j1Map::Load(const char* file_name)
 
 	// TODO 4: Iterate all layers and load each of them
 	// Load layer info ----------------------------------------------
+	pugi::xml_node layerload;
+	for (layerload = map_file.child("map").child("layer"); layerload && ret; layerload = layerload.next_sibling("tile"))
+	{
+		MapLayer* set_ly = new MapLayer();
 
+		if (ret == true)
+		{
+			ret = LoadLayer(layerload, set_ly);
+		}
+
+		data.layers.add(set_ly);
+	}
 
 	if(ret == true)
 	{
@@ -154,9 +165,9 @@ bool j1Map::Load(const char* file_name)
 			item = item->next;
 		}
 
-		// TODO 4: Add info here about your loaded layers
+		// TODO 4: Add info here about your loaded layers	 
 		// Adapt this vcode with your own variables
-		/*
+		
 		p2List_item<MapLayer*>* item_layer = data.layers.start;
 		while(item_layer != NULL)
 		{
@@ -165,7 +176,7 @@ bool j1Map::Load(const char* file_name)
 			LOG("name: %s", l->name.GetString());
 			LOG("tile width: %d tile height: %d", l->width, l->height);
 			item_layer = item_layer->next;
-		}*/
+		}
 	}
 
 	map_loaded = ret;
