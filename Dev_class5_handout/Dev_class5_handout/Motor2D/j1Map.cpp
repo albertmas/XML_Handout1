@@ -32,6 +32,16 @@ void j1Map::Draw()
 		return;
 
 	// TODO 5: Prepare the loop to draw all tilesets + Blit
+	for (int y = 0; y < data.layers.start->data->height; y++)
+	{
+		for (int x = 0; x < data.layers.start->data->width; x++)
+		{
+			App->render->Blit(
+				data.tilesets.start->data->texture,
+				data.tilesets.start->data->tile_width, data.tilesets.start->data->tile_height,
+				&data.tilesets.start->data->GetTileRect(data.layers.start->data->data[data.layers.start->data->Get(x, y)]));
+		}
+	}
 
 		// TODO 9: Complete the draw function
 
@@ -62,7 +72,7 @@ SDL_Rect TileSet::GetTileRect(int id) const
 // Called before quitting
 bool j1Map::CleanUp()
 {
-	LOG("Unloading map");
+	LOG("Unloading map.\n");
 
 	// Remove all tilesets
 	p2List_item<TileSet*>* item;
@@ -82,8 +92,8 @@ bool j1Map::CleanUp()
 
 	while (items_layers != NULL) //You iterate betweem the items of the layers to release them all
 	{
-		RELEASE(items_layers);
-		items_layers->next;
+		RELEASE(items_layers->data);
+		items_layers = items_layers->next;
 	}
 
 	data.layers.clear(); // Then you can clear the List
@@ -322,7 +332,7 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	memset(layer->data, 0, layer->size);
 	
 	int x = 0;
-	for (pugi::xml_node tile = node.child("data").child("tile"); tile; tile.next_sibling()) // The tile node helps iterate between all the tile siblings
+	for (pugi::xml_node tile = node.child("data").child("tile"); tile; tile = tile.next_sibling()) // The tile node helps iterate between all the tile siblings
 	{
 		layer->data[x] = tile.attribute("gid").as_uint();
 		x++;

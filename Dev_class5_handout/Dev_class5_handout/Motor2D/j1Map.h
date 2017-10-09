@@ -8,7 +8,6 @@
 
 // TODO 1: Create a struct for the map layer
 // ----------------------------------------------------
-
 struct MapLayer
 {
 	p2SString name;
@@ -16,6 +15,10 @@ struct MapLayer
 	uint height;
 	uint* data;
 	uint size;
+	inline uint Get(int x, int y)const
+	{
+		return y*width + x;
+	};
 	~MapLayer()
 	{
 		RELEASE(data);
