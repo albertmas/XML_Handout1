@@ -32,14 +32,16 @@ void j1Map::Draw()
 		return;
 
 	// TODO 5: Prepare the loop to draw all tilesets + Blit
-	for (int y = 0; y < data.layers.start->data->height; y++)
+	for (int _y = 0; _y < data.layers.start->data->height; _y++)
 	{
-		for (int x = 0; x < data.layers.start->data->width; x++)
+		for (int _x = 0; _x < data.layers.start->data->width; _x++)
 		{
+			iPoint point = MapToWorld(_x, _y);
 			App->render->Blit(
 				data.tilesets.start->data->texture,
-				data.tilesets.start->data->tile_width, data.tilesets.start->data->tile_height,
-				&data.tilesets.start->data->GetTileRect(data.layers.start->data->data[data.layers.start->data->Get(x, y)]));
+				point.x, point.y,
+				&data.tilesets.start->data->GetTileRect(data.layers.start->data->data[data.layers.start->data->Get(_x, _y)])
+			);
 		}
 	}
 
