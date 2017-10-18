@@ -110,7 +110,18 @@ bool j1Map::IsWalkable(int x, int y) const
 	if (data.width > x && x >= 0 &&
 		data.height > y && y >= 0)
 	{
-		/*if (data.layers.start->data->properties.Get("Nodraw") != 0)
+		int _id = iPointToTile(x, y);
+
+		pugi::xml_node layerload = map_file.child("layer").next_sibling("layer").child("data").child("tile");
+		for (int x = 0; x < _id; x++)
+		{
+			layerload = layerload.next_sibling("tile");
+		}
+
+		if (layerload.attribute("gid").as_int() != 0)
+			ret = false;
+
+		/*if (data.layers.start->data->properties.Get("Navigation") != 0)
 			ret = false;*/
 		// If the tile is walkabe
 		// else	{ ret = false }
@@ -119,6 +130,11 @@ bool j1Map::IsWalkable(int x, int y) const
 		ret = false;
 
 	return ret;
+}
+
+int j1Map::iPointToTile(int _x, int _y) const
+{
+	return ((_y - 1) * data.tile_width + _x);
 }
 
 void j1Map::Draw()

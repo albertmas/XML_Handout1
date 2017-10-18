@@ -129,6 +129,8 @@ public:
 	bool IsWalkable(int x, int y) const;
 	void ResetBFS();
 
+	int iPointToTile(int _x, int _y) const;
+
 private:
 
 	bool LoadMap();
