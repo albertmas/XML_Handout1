@@ -132,6 +132,7 @@ public:
 	void ResetPath();
 	void DrawPath();
 	void Path(int x, int y);
+	void PathAStar(int x, int y);
 
 	// Propagation style
 	void PropagateBFS();

@@ -83,6 +83,17 @@ bool j1Scene::Update(float dt)
 		App->input->GetMousePosition(p.x, p.y);
 		App->map->Path(p.x - App->render->camera.x, p.y - App->render->camera.y);
 	}
+	if (App->input->GetKey(SDL_SCANCODE_V) == KEY_DOWN)
+		App->map->PropagateAStar();
+	if (App->input->GetKey(SDL_SCANCODE_B) == KEY_REPEAT)
+		App->map->PropagateAStar();
+	if (App->input->GetMouseButtonDown(3) == KEY_DOWN)
+	{
+		iPoint p;
+		App->input->GetMousePosition(p.x, p.y);
+		App->map->PathAStar(p.x - App->render->camera.x, p.y - App->render->camera.y);
+
+	}
 
 	App->map->Draw();
 
