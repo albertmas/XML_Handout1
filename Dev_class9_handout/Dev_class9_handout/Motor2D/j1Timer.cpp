@@ -17,6 +17,7 @@ void j1Timer::Start()
 {
 	// TODO 1: Fill Start(), Read(), ReadSec() methods
 	// they are simple, one line each!
+	uint lastTime = 0;
 }
 
 // ---------------------------------------------
@@ -28,5 +29,5 @@ uint32 j1Timer::Read() const
 // ---------------------------------------------
 float j1Timer::ReadSec() const
 {
-	return 0.0f;
+	return SDL_GetTicks();
 }
