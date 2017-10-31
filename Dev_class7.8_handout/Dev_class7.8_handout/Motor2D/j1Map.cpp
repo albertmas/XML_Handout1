@@ -117,7 +117,7 @@ void j1Map::PropagateAStar()
 	uint new_cost;
 	if (frontier.Pop(curr))
 	{
-		if (path.Count() == 1 && path.At(0)->x != curr.x && path.At(0)->y != curr.y)
+		if (visited.find(WorldToMap(A_Star_Goal.x, A_Star_Goal.y)) == -1)
 		{
 			iPoint neighbors[4];
 			neighbors[0].create(curr.x + 1, curr.y + 0);
@@ -133,14 +133,14 @@ void j1Map::PropagateAStar()
 
 					if (cost_so_far[neighbors[i].x][neighbors[i].y] == 0 || new_cost < cost_so_far[neighbors[i].x][neighbors[i].y])
 					{
-						if (visited.find(neighbors[i]) == -1)
+						if (visited.find(neighbors[i]) == -1 && visited.find(WorldToMap(A_Star_Goal.x, A_Star_Goal.y)) == -1)
 						{
 							frontier.Push(neighbors[i], new_cost);
 							visited.add(neighbors[i]);
 
 							breadcrumbs.add(curr);
 
-							cost_so_far[neighbors[i].x][neighbors[i].y] = new_cost;
+							cost_so_far[neighbors[i].x][neighbors[i].y] = new_cost + neighbors[i].DistanceManhattan(WorldToMap(A_Star_Goal.x, A_Star_Goal.y));
 						}
 					}
 				}

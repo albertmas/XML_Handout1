@@ -152,6 +152,7 @@ private:
 public:
 
 	MapData data;
+	iPoint A_Star_Goal;
 
 private:
 
