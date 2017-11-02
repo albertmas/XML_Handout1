@@ -16,6 +16,8 @@ public:
 
 private:
 	uint32	started_at;
+	uint32* lastTime = 0;
+	uint32* currentTime;
 };
 
 #endif //__j1TIMER_H__
