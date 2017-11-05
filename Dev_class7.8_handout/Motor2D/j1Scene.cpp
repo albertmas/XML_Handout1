@@ -91,7 +91,7 @@ bool j1Scene::Update(float dt)
 	{
 		iPoint p;
 		App->input->GetMousePosition(p.x, p.y);
-		App->map->A_Star_Goal = p;
+		App->map->A_Star_Goal = App->map->WorldToMap(p.x, p.y);
 		App->map->PathAStar(p.x - App->render->camera.x, p.y - App->render->camera.y);
 
 	}
