@@ -232,7 +232,20 @@ int j1PathFinding::CreatePath(const iPoint& origin, const iPoint& destination)
 		// If it is a better path, Update the parent
 		for (int j = 0; j < adj_nodes.list.count(); j++)
 		{
-			
+			if (close.Find(adj_nodes.list.At(j)->data.pos) == NULL)
+			{
+				//calculate F
+				adj_nodes.list.At(j)->data.CalculateF(destination);
+				if (open.Find(adj_nodes.list.At(j)->data.pos) == NULL)
+				{
+					open.list.add(adj_nodes.list.At(j)->data);
+				}
+				else
+				{
+
+				}
+
+			}
 		}
 
 	}
