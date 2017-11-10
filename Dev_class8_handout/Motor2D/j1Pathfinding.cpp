@@ -234,17 +234,18 @@ int j1PathFinding::CreatePath(const iPoint& origin, const iPoint& destination)
 		{
 			if (close.Find(adj_nodes.list.At(j)->data.pos) == NULL)
 			{
-				//calculate F
-				adj_nodes.list.At(j)->data.CalculateF(destination);
 				if (open.Find(adj_nodes.list.At(j)->data.pos) == NULL)
 				{
+					adj_nodes.list.At(j)->data.CalculateF(destination);//calculate F
 					open.list.add(adj_nodes.list.At(j)->data);
 				}
 				else
 				{
-
+					if (adj_nodes.list.At(j)->data.g < open.Find(adj_nodes.list.At(j)->data.pos)->data.g)
+					{
+						open.Find(adj_nodes.list.At(j)->data.pos)->data.parent = adj_nodes.list.At(j)->data.parent;
+					}
 				}
-
 			}
 		}
 
