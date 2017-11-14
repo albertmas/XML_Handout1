@@ -171,6 +171,8 @@ void j1App::PrepareUpdate()
 	last_sec_frame_count++;
 
 	// TODO 4: Calculate the dt: differential time since last frame
+	float dt;
+
 	frame_time.Start();
 }
 
@@ -203,10 +205,31 @@ void j1App::FinishUpdate()
 	App->win->SetTitle(title);
 
 	// TODO 2: Use SDL_Delay to make sure you get your capped framerate
-	uint32 msPerFrame = 1 / frame_cap;	
-	//SDL_Delay(msPerFrame - ptimer.ReadMs());
+	j1PerfTimer* time_stopped = new j1PerfTimer();
 
+	msPerFrame = 1000 / frame_cap;	
+	
+	if (msPerFrame - last_frame_ms > 0)
+	{
+		SDL_Delay(msPerFrame - last_frame_ms);
+		msUntilNextFrame = msPerFrame - last_frame_ms;
+	}
+	else if (msPerFrame * 2 - last_frame_ms > 0)
+	{
+		SDL_Delay(msPerFrame * 2 - last_frame_ms);
+		msUntilNextFrame = msPerFrame * 2 - last_frame_ms;
+	}
+	else if (msPerFrame * 3 - last_frame_ms > 0)
+	{
+		SDL_Delay(msPerFrame * 3 - last_frame_ms);
+		msUntilNextFrame = msPerFrame * 3 - last_frame_ms;
+	}
+	
 	// TODO3: Measure accurately the amount of time it SDL_Delay actually waits compared to what was expected
+	msActualWait = time_stopped->ReadMs();
+	LOG("We waited %d ms and got back in %d ms", msUntilNextFrame, msActualWait);
+
+	delete time_stopped;
 }
 
 // Call modules before each loop iteration
