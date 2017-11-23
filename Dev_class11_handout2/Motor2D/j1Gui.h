@@ -6,6 +6,10 @@
 #define CURSOR_WIDTH 2
 
 // TODO 1: Create your structure of classes
+struct GUI
+{
+	SDL_Rect
+};
 
 // ---------------------------------------------------
 class j1Gui : public j1Module
