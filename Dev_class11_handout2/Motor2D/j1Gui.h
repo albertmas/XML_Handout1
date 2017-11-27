@@ -2,14 +2,10 @@
 #define __j1GUI_H__
 
 #include "j1Module.h"
-
+#include "UIelement.h"
 #define CURSOR_WIDTH 2
 
 // TODO 1: Create your structure of classes
-struct GUI
-{
-	SDL_Rect
-};
 
 // ---------------------------------------------------
 class j1Gui : public j1Module
@@ -39,12 +35,17 @@ public:
 	// TODO 2: Create the factory methods
 	// Gui creation functions
 
-	const SDL_Texture* GetAtlas() const;
+	SDL_Texture* GetAtlas() const;
 
 private:
 
 	SDL_Texture* atlas;
 	p2SString atlas_file_name;
+
+	p2List<UIelement*> elements;
+	SDL_Texture* background;
+
+	bool MouseInside(SDL_Rect* rect);
 };
 
 #endif // __j1GUI_H__
