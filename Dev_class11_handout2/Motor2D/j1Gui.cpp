@@ -39,12 +39,28 @@ bool j1Gui::Start()
 
 	background = App->tex->Load("gui/background.png");
 
-	UIelement* ship_image = new UIimage({ 80, 80 }, { 485, 829, 328, 103 });
+	/*UIelement* ship_image = new UIimage({ 80, 80 }, { 485, 829, 328, 103 });
 	elements.add(ship_image);
 	UIelement* example_text = new UItext({ (ship_image->position.x + ship_image->piece.w/2), 65 }, "Hello World", { 255, 255, 0, 255 });
 	elements.add(example_text);
 	UIelement* ship_button = new UIbutton({ 80, 200 }, { 485, 829, 328, 103 }, "Hello World", { 255, 255, 0, 255 });
-	elements.add(ship_button);
+	elements.add(ship_button);*/
+
+	UIelement* blizzard = new UIimage({ 450, 480 }, { 271, 0, 127, 80 });
+	elements.add(blizzard);
+	UIelement* warning = new UIimage({ 20, 500 }, { 275, 84, 130, 39 });
+	elements.add(warning);
+	UIelement* wowlogo = new UIimage({ 10, 10 }, { 2, 205, 312, 135 });
+	elements.add(wowlogo);
+	UIelement* textbox1 = new UIimage({ 450, 300 }, { 6, 116, 127, 22 });
+	elements.add(textbox1);
+	UIelement* check_button = new UIbutton({ 20, 470 }, { 407, 293, 16, 16 });
+	elements.add(check_button);
+	UIelement* check_text = new UItext({ 45, 470 }, "Remember Account Name", { 255, 255, 0, 255 });
+	elements.add(check_text);
+	UIelement* button = new UIbutton({ 80, 80 }, { 118, 2, 127, 22 });
+	elements.add(button);
+	
 
 	return true;
 }

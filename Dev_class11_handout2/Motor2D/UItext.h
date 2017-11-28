@@ -21,7 +21,6 @@ public:
 	UItext(iPoint pos_, const char* text_, SDL_Color colour_)
 	{
 		position = pos_;
-		colour = colour_;
 		texture = App->tex->textures.add(App->font->Print(text_, colour_, App->font->default))->data;
 	}
 

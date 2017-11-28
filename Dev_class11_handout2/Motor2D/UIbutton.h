@@ -14,7 +14,6 @@ class UIbutton : public UIelement
 {
 public:
 	SDL_Texture* texture;
-	//p2SString text;
 
 	UIbutton() {};
 	UIbutton(iPoint pos_, SDL_Rect rect_, const char* text_ = "", SDL_Color colour_ = { 255, 255, 255, 255 })
