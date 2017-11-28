@@ -14,7 +14,7 @@ class UItext : public UIelement
 {
 public:
 	SDL_Texture* texture;
-	p2SString text;
+	//p2SString text;
 	SDL_Color colour;
 public:
 	UItext() {};

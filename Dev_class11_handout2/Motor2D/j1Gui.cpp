@@ -10,6 +10,7 @@
 
 #include "UIimage.h"
 #include "UItext.h"
+#include "UIbutton.h"
 
 j1Gui::j1Gui() : j1Module()
 {
@@ -42,6 +43,8 @@ bool j1Gui::Start()
 	elements.add(ship_image);
 	UIelement* example_text = new UItext({ (ship_image->position.x + ship_image->piece.w/2), 65 }, "Hello World", { 255, 255, 0, 255 });
 	elements.add(example_text);
+	UIelement* ship_button = new UIbutton({ 80, 200 }, { 485, 829, 328, 103 }, "Hello World", { 255, 255, 0, 255 });
+	elements.add(ship_button);
 
 	return true;
 }
