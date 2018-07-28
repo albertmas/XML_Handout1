@@ -1,25 +1,26 @@
-<!-- Config file for the game -->
+<?xml version="1.0" encoding="utf-8"?>
 
 <config>
   <app>
     <title>Game Development Testbed</title>
     <organization>UPC</organization>
   </app>
-	
+  <audio>
+    <volume value="0" />
+  </audio>
+  <input></input>
   <renderer>
     <vsync value="false"/>
-  </renderer>
-
-  <window>
-    <resolution width="1024" height="768" scale="1"/>
     <fullscreen value="false"/>
     <borderless value="false"/>
-    <resizable value="false"/>
-    <fullscreen_window value="false"/>
-  </window>
-
-  <audio>
-    <volume default="80" />
-  </audio>
-
+    <resizable value="true"/>
+    <fullscreen_win value="false"/>
+    <title value="replacement title"/>
+    <width value="1024"/>
+    <height value="768"/>
+    <scale value="1"/>
+  </renderer>
+  <tex></tex>
+  <win></win>
+  <scene></scene>
 </config>
