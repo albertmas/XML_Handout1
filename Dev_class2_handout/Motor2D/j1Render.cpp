@@ -20,15 +20,19 @@ j1Render::~j1Render()
 {}
 
 // Called before render is available
-bool j1Render::Awake()
+bool j1Render::Awake(pugi::xml_node& config)
 {
 	LOG("Create SDL rendering context");
 	bool ret = true;
 	// load flags
 	Uint32 flags = SDL_RENDERER_ACCELERATED;
 
-	flags |= SDL_RENDERER_PRESENTVSYNC;
-	  
+	if(config.child("vsync").attribute("value").as_bool(true) == true)
+	{
+		flags |= SDL_RENDERER_PRESENTVSYNC;
+		LOG("Using vsync");
+	}
+
 	renderer = SDL_CreateRenderer(App->win->window, -1, flags);
 
 	if(renderer == NULL)
@@ -80,6 +84,28 @@ bool j1Render::CleanUp()
 {
 	LOG("Destroying SDL render");
 	SDL_DestroyRenderer(renderer);
+	return true;
+}
+
+// TODO 6: Create a method to load the state
+// for now it will be camera's x and y
+
+bool j1Render::LoadModule(pugi::xml_node& node)
+{
+	camera.x = node.child("camera").attribute("x").as_int();
+	camera.y = node.child("camera").attribute("y").as_int();
+
+	return true;
+}
+
+// TODO 8: Create a method to save the state
+// using append_child and append_attribute
+
+const bool j1Render::SaveModule(pugi::xml_node& node)
+{
+	node.append_child("camera").append_attribute("x").set_value(camera.x);
+	node.child("camera").append_attribute("y").set_value(camera.y);
+
 	return true;
 }
 

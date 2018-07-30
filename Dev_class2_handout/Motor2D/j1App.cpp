@@ -1,3 +1,6 @@
+#include <iostream> 
+#include <sstream> 
+
 #include "p2Defs.h"
 #include "p2Log.h"
 
@@ -46,6 +49,8 @@ j1App::~j1App()
 	}
 
 	modules.clear();
+
+	config_file.reset();
 }
 
 void j1App::AddModule(j1Module* module)
@@ -57,39 +62,22 @@ void j1App::AddModule(j1Module* module)
 // Called before render is available
 bool j1App::Awake()
 {
-	// TODO 3: Load config.xml file using load_file() method from the xml_document class.
-	// If everything goes well, load the top tag inside the xml_node property
-	// created in the last TODO
+	bool ret = LoadConfig();
 
-	pugi::xml_parse_result result = config.load_file("config.xml");
-	if (result != NULL)
+	// self-config
+	title.create(app_config.child("title").child_value());
+	organization.create(app_config.child("organization").child_value());
+
+	if(ret == true)
 	{
-		config_node = config.child("config");
-	}
-	else
-	{
-		LOG("ERROR LOADING XML");
-	}
+		p2List_item<j1Module*>* item;
+		item = modules.start;
 
-	bool ret = true;
-
-	p2List_item<j1Module*>* item;
-	item = modules.start;
-	pugi::xml_node iter;
-
-	while(item != NULL && ret == true)
-	{
-		// TODO 7: Add a new argument to the Awake method to receive a pointer to a xml node.
-		// If the section with the module name exist in config.xml, fill the pointer with the address of a valid xml_node
-		// that can be used to read all variables from that section. Send nullptr if the section does not exist in config.xml
-		iter = config_node.child(item->data->name.GetString());
-		if (iter != NULL)
+		while(item != NULL && ret == true)
 		{
-
+			ret = item->data->Awake(config.child(item->data->name.GetString()));
+			item = item->next;
 		}
-
-		ret = item->data->Awake();
-		item = item->next;
 	}
 
 	return ret;
@@ -133,6 +121,28 @@ bool j1App::Update()
 	return ret;
 }
 
+
+// ---------------------------------------------
+bool j1App::LoadConfig()
+{
+	bool ret = true;
+
+	pugi::xml_parse_result result = config_file.load_file("config.xml");
+
+	if(result == NULL)
+	{
+		LOG("Could not load map xml file config.xml. pugi error: %s", result.description());
+		ret = false;
+	}
+	else
+	{
+		config = config_file.child("config");
+		app_config = config.child("app");
+	}
+
+	return ret;
+}
+
 // ---------------------------------------------
 void j1App::PrepareUpdate()
 {
@@ -141,6 +151,20 @@ void j1App::PrepareUpdate()
 // ---------------------------------------------
 void j1App::FinishUpdate()
 {
+	// TODO 1: This is a good place to call load / Save functions
+	if (Save == true)
+	{
+		LOG("Saving");
+		SaveXML();
+		Save = false;
+	}
+	if (Load == true)
+	{
+		LOG("Loading");
+		LoadXML();
+		Load = false;
+	}
+
 }
 
 // Call modules before each loop iteration
@@ -238,3 +262,70 @@ const char* j1App::GetArgv(int index) const
 	else
 		return NULL;
 }
+
+// ---------------------------------------
+const char* j1App::GetTitle() const
+{
+	return title.GetString();
+}
+
+// ---------------------------------------
+const char* j1App::GetOrganization() const
+{
+	return organization.GetString();
+}
+
+
+// TODO 3: Create a simulation of the xml file to read 
+
+// TODO 4: Create a method to actually load an xml file
+// then call all the modules to load themselves
+const bool j1App::LoadXML()
+{
+	bool ret = true;
+
+	pugi::xml_document savegame;
+	pugi::xml_parse_result result = savegame.load_file("savegame.xml");
+	if (result != -1)
+	{
+		pugi::xml_node save = savegame.child("save");
+
+
+		p2List_item<j1Module*>* iter = modules.start;
+		while (iter != NULL && ret == true)
+		{
+			ret = iter->data->LoadModule(save.child(iter->data->name.GetString()));
+			iter = iter->next;
+		}
+	}
+	else
+	{
+		LOG("ERROR READING SAVEGAME XML");
+		LOG(result.description());
+		ret = false;
+	}
+
+	return ret;
+}
+
+// TODO 7: Create a method to save the current state
+
+const bool j1App::SaveXML()
+{
+	bool ret = true;
+
+	pugi::xml_document savegame;
+	pugi::xml_node save = savegame.append_child("save");
+
+	p2List_item<j1Module*>* iter = modules.start;
+	while (iter != NULL && ret == true)
+	{
+		ret = iter->data->SaveModule(save.append_child(iter->data->name.GetString()));
+		iter = iter->next;
+	}
+
+	savegame.save_file("savegame.xml");
+
+	return ret;
+}
+

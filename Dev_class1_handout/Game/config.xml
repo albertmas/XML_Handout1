@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<config>
+  <app>
+    <title>Game Development Testbed</title>
+    <organization>UPC</organization>
+  </app>
+  <audio>
+    <volume value="0" />
+  </audio>
+  <input></input>
+  <renderer>
+    <vsync value="false"/>
+    <fullscreen value="false"/>
+    <borderless value="false"/>
+    <resizable value="true"/>
+    <fullscreen_win value="false"/>
+    <title value="replacement title"/>
+    <width value="1024"/>
+    <height value="768"/>
+    <scale value="1"/>
+  </renderer>
+  <tex></tex>
+  <win></win>
+  <scene></scene>
+</config>

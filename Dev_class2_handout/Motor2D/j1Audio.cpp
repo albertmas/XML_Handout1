@@ -19,7 +19,7 @@ j1Audio::~j1Audio()
 {}
 
 // Called before render is available
-bool j1Audio::Awake()
+bool j1Audio::Awake(pugi::xml_node& config)
 {
 	LOG("Loading Audio Mixer");
 	bool ret = true;
@@ -50,6 +50,10 @@ bool j1Audio::Awake()
 		active = false;
 		ret = true;
 	}
+
+	//Setting initial volume
+	volume = config.child("audio").child("volume").attribute("default").as_int(volume);
+	Mix_VolumeMusic(volume);
 
 	return ret;
 }
@@ -171,4 +175,73 @@ bool j1Audio::PlayFx(unsigned int id, int repeat)
 	}
 
 	return ret;
+}
+
+const bool j1Audio::RiseVolume()
+{
+	bool ret = true;
+
+	if (volume < 128)
+	{
+		volume += 16;
+		if (volume > 128)
+			volume = 128;
+		Mix_VolumeMusic(volume);
+		LOG("Volume risen");
+	}
+	else
+	{
+		LOG("MAX Volume");
+		ret = false;
+	}
+
+	return ret;
+}
+
+const bool j1Audio::LowerVolume()
+{
+	bool ret = true;
+
+	if (volume > 0)
+	{
+		volume -= 16;
+		if (volume < 0)
+			volume = 0;
+		Mix_VolumeMusic(volume);
+		LOG("Volume lowered");
+	}
+	else
+	{
+		LOG("MIN Volume");
+		ret = false;
+	}
+
+	return ret;
+}
+
+bool j1Audio::LoadModule(pugi::xml_node& node)
+{
+	bool ret = true;
+
+	int newvolume = node.child("volume").attribute("value").as_uint(-1);
+	if (newvolume != -1)
+	{
+		volume = newvolume;
+		Mix_VolumeMusic(volume);
+		LOG("Volume Loaded");
+	}
+	else
+	{
+		LOG("ERROR LOADING VOLUME");
+		ret = false;
+	}
+
+	return ret;
+}
+
+const bool j1Audio::SaveModule(pugi::xml_node& node)
+{
+	node.append_child("volume").append_attribute("value").set_value(volume);
+
+	return true;
 }
