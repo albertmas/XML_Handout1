@@ -13,7 +13,6 @@ class j1Input;
 class j1Render;
 class j1Textures;
 class j1Audio;
-class j1FileSystem;
 class j1Scene;
 class j1Map;
 class j1PathFinding;
@@ -87,7 +86,6 @@ public:
 	j1Textures*			tex = NULL;
 	j1Audio*			audio = NULL;
 	j1Scene*			scene = NULL;
-	j1FileSystem*		fs = NULL;
 	j1Map*				map = NULL;
 	j1PathFinding*		pathfinding = NULL;
 
@@ -105,6 +103,13 @@ private:
 	p2SString			load_game;
 	mutable p2SString	save_game;
 
+	j1PerfTimer			ptimer;
+	uint64				frame_count = 0;
+	j1Timer				startup_time;
+	j1Timer				frame_time;
+	j1Timer				last_sec_frame_time;
+	uint32				last_sec_frame_count = 0;
+	uint32				prev_last_sec_frame_count = 0;
 };
 
 extern j1App* App; // No student is asking me about that ... odd :-S

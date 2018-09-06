@@ -10,7 +10,6 @@
 #include "j1Textures.h"
 #include "j1Audio.h"
 #include "j1Scene.h"
-#include "j1FileSystem.h"
 #include "j1Map.h"
 #include "j1Pathfinding.h"
 #include "j1App.h"
@@ -22,19 +21,19 @@
 // Constructor
 j1App::j1App(int argc, char* args[]) : argc(argc), args(args)
 {
+	ptimer.Start();
+
 	input = new j1Input();
 	win = new j1Window();
 	render = new j1Render();
 	tex = new j1Textures();
 	audio = new j1Audio();
 	scene = new j1Scene();
-	fs = new j1FileSystem();
 	map = new j1Map();
 	pathfinding = new j1PathFinding();
 
 	// Ordered for awake / Start / Update
 	// Reverse order of CleanUp
-	AddModule(fs);
 	AddModule(input);
 	AddModule(win);
 	AddModule(tex);
@@ -45,6 +44,8 @@ j1App::j1App(int argc, char* args[]) : argc(argc), args(args)
 
 	// render last to swap buffer
 	AddModule(render);
+
+	LOG("%s took %f ms", __FUNCTION__, ptimer.ReadMs());
 }
 
 // Destructor
@@ -71,6 +72,8 @@ void j1App::AddModule(j1Module* module)
 // Called before render is available
 bool j1App::Awake()
 {
+	ptimer.Start();
+
 	pugi::xml_document	config_file;
 	pugi::xml_node		config;
 	pugi::xml_node		app_config;
@@ -99,6 +102,7 @@ bool j1App::Awake()
 			item = item->next;
 		}
 	}
+	LOG("%s took %f ms", __FUNCTION__, ptimer.ReadMs());
 
 	return ret;
 }
@@ -106,6 +110,7 @@ bool j1App::Awake()
 // Called before the first frame
 bool j1App::Start()
 {
+	ptimer.Start();
 	bool ret = true;
 	p2List_item<j1Module*>* item;
 	item = modules.start;
@@ -115,6 +120,10 @@ bool j1App::Start()
 		ret = item->data->Start();
 		item = item->next;
 	}
+	startup_time.Start();
+
+	LOG("%s took %f ms", __FUNCTION__, ptimer.ReadMs());
+
 	return ret;
 }
 
@@ -145,10 +154,7 @@ pugi::xml_node j1App::LoadConfig(pugi::xml_document& config_file) const
 {
 	pugi::xml_node ret;
 
-	char* buf;
-	int size = App->fs->Load("config.xml", &buf);
-	pugi::xml_parse_result result = config_file.load_buffer(buf, size);
-	RELEASE(buf);
+	pugi::xml_parse_result result = config_file.load_file("config.xml");
 
 	if(result == NULL)
 		LOG("Could not load map xml file config.xml. pugi error: %s", result.description());
@@ -161,6 +167,10 @@ pugi::xml_node j1App::LoadConfig(pugi::xml_document& config_file) const
 // ---------------------------------------------
 void j1App::PrepareUpdate()
 {
+	frame_count++;
+	last_sec_frame_count++;
+
+	frame_time.Start();
 }
 
 // ---------------------------------------------
@@ -179,15 +189,21 @@ void j1App::FinishUpdate()
 	// Amount of ms took the last update
 	// Amount of frames during the last second
 
-	float avg_fps = 0.0f;
-	float seconds_since_startup = 0.0f;
+	if (last_sec_frame_time.Read() >= 1000)
+	{
+		last_sec_frame_time.Start();
+		prev_last_sec_frame_count = last_sec_frame_count;
+		last_sec_frame_count = 0;
+	}
+
+	float avg_fps = (float)frame_count / startup_time.ReadSec();
+	float seconds_since_startup = startup_time.ReadSec();
 	float dt = 0.0f;
-	uint32 last_frame_ms = 0;
-	uint32 frames_on_last_update = 0;
-	uint64 frame_count = 0;
+	uint32 last_frame_ms = frame_time.Read();
+	uint32 frames_on_last_update = prev_last_sec_frame_count;
 
 	static char title[256];
-	sprintf_s(title, 256, "Av.FPS: %.2f Last Frame Ms: %u Last sec frames: %i Last dt: %.3f Time since startup: %.3f Frame Count: %lu ",
+	sprintf_s(title, 256, "Av.FPS: %.2f Last Frame Ms: %02u Last sec frames: %i Last dt: %.3f Time since startup: %.3f Frame Count: %lu ",
 			  avg_fps, last_frame_ms, frames_on_last_update, dt, seconds_since_startup, frame_count);
 
 	App->win->SetTitle(title);
@@ -261,6 +277,7 @@ bool j1App::PostUpdate()
 // Called before quitting
 bool j1App::CleanUp()
 {
+	ptimer.Start();
 	bool ret = true;
 	p2List_item<j1Module*>* item;
 	item = modules.end;
@@ -270,6 +287,8 @@ bool j1App::CleanUp()
 		ret = item->data->CleanUp();
 		item = item->prev;
 	}
+	LOG("%s took %f ms", __FUNCTION__, ptimer.ReadMs());
+
 	return ret;
 }
 
@@ -312,7 +331,7 @@ void j1App::LoadGame(const char* file)
 	// we should be checking if that file actually exist
 	// from the "GetSaveGames" list
 	want_to_load = true;
-	load_game.create("%s%s", fs->GetSaveDirectory(), file);
+	//load_game.create("%s%s", fs->GetSaveDirectory(), file);
 }
 
 // ---------------------------------------
@@ -335,43 +354,34 @@ bool j1App::LoadGameNow()
 {
 	bool ret = false;
 
-	char* buffer;
-	uint size = fs->Load(load_game.GetString(), &buffer);
+	pugi::xml_document data;
+	pugi::xml_node root;
 
-	if(size > 0)
+	pugi::xml_parse_result result = data.load_file(load_game.GetString());
+
+	if(result != NULL)
 	{
-		pugi::xml_document data;
-		pugi::xml_node root;
+		LOG("Loading new Game State from %s...", load_game.GetString());
 
-		pugi::xml_parse_result result = data.load_buffer(buffer, size);
-		RELEASE(buffer);
+		root = data.child("game_state");
 
-		if(result != NULL)
+		p2List_item<j1Module*>* item = modules.start;
+		ret = true;
+
+		while(item != NULL && ret == true)
 		{
-			LOG("Loading new Game State from %s...", load_game.GetString());
-
-			root = data.child("game_state");
-
-			p2List_item<j1Module*>* item = modules.start;
-			ret = true;
-
-			while(item != NULL && ret == true)
-			{
-				ret = item->data->Load(root.child(item->data->name.GetString()));
-				item = item->next;
-			}
-
-			data.reset();
-			if(ret == true)
-				LOG("...finished loading");
-			else
-				LOG("...loading process interrupted with error on module %s", (item != NULL) ? item->data->name.GetString() : "unknown");
+			ret = item->data->Load(root.child(item->data->name.GetString()));
+			item = item->next;
 		}
+
+		data.reset();
+		if(ret == true)
+			LOG("...finished loading");
 		else
-			LOG("Could not parse game state xml file %s. pugi error: %s", load_game.GetString(), result.description());
+			LOG("...loading process interrupted with error on module %s", (item != NULL) ? item->data->name.GetString() : "unknown");
 	}
 	else
-		LOG("Could not load game state xml file %s", load_game.GetString());
+		LOG("Could not parse game state xml file %s. pugi error: %s", load_game.GetString(), result.description());
 
 	want_to_load = false;
 	return ret;
@@ -403,7 +413,7 @@ bool j1App::SavegameNow() const
 		data.save(stream);
 
 		// we are done, so write data to disk
-		fs->Save(save_game.GetString(), stream.str().c_str(), stream.str().length());
+//		fs->Save(save_game.GetString(), stream.str().c_str(), stream.str().length());
 		LOG("... finished saving", save_game.GetString());
 	}
 	else
