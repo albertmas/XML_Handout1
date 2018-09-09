@@ -87,7 +87,12 @@ bool j1App::Awake()
 		organization.create(app_config.child("organization").child_value());
 
 		// TODO 1: Read from config file your framerate cap
-		frame_cap = app_config.attribute("framerate_cap").as_int(-1);
+		if (config.child("app").attribute("framerate_cap").as_int() != NULL)
+		{
+			framerate_cap = config.child("app").attribute("framerate_cap").as_int();
+		}
+		else
+			framerate_cap = -1;
 	}
 
 	if(ret == true)
@@ -171,8 +176,7 @@ void j1App::PrepareUpdate()
 	last_sec_frame_count++;
 
 	// TODO 4: Calculate the dt: differential time since last frame
-	float dt;
-
+	dt = frame_time.ReadSec();
 	frame_time.Start();
 }
 
@@ -205,31 +209,19 @@ void j1App::FinishUpdate()
 	App->win->SetTitle(title);
 
 	// TODO 2: Use SDL_Delay to make sure you get your capped framerate
-	j1PerfTimer* time_stopped = new j1PerfTimer();
+	if (framerate_cap > 0)
+	{
+		j1PerfTimer actual_wait;
 
-	msPerFrame = 1000 / frame_cap;	
-	
-	if (msPerFrame - last_frame_ms > 0)
-	{
-		SDL_Delay(msPerFrame - last_frame_ms);
-		msUntilNextFrame = msPerFrame - last_frame_ms;
-	}
-	else if (msPerFrame * 2 - last_frame_ms > 0)
-	{
-		SDL_Delay(msPerFrame * 2 - last_frame_ms);
-		msUntilNextFrame = msPerFrame * 2 - last_frame_ms;
-	}
-	else if (msPerFrame * 3 - last_frame_ms > 0)
-	{
-		SDL_Delay(msPerFrame * 3 - last_frame_ms);
-		msUntilNextFrame = msPerFrame * 3 - last_frame_ms;
-	}
-	
-	// TODO3: Measure accurately the amount of time it SDL_Delay actually waits compared to what was expected
-	msActualWait = time_stopped->ReadMs();
-	LOG("We waited %d ms and got back in %d ms", msUntilNextFrame, msActualWait);
+		frame_delay = 1000 / framerate_cap;
+		if (frame_delay > last_frame_ms)
+			SDL_Delay(frame_delay - last_frame_ms);
 
-	delete time_stopped;
+
+		// TODO3: Measure accurately the amount of time it SDL_Delay actually waits compared to what was expected
+
+		LOG("We waited for %d ms and got back in %f", frame_delay - last_frame_ms, actual_wait.ReadMs());
+	}
 }
 
 // Call modules before each loop iteration
@@ -273,7 +265,7 @@ bool j1App::DoUpdate()
 		// TODO 5: send dt as an argument to all updates
 		// you will need to update module parent class
 		// and all modules that use update
-		ret = item->data->Update();
+		ret = item->data->Update(dt);
 	}
 
 	return ret;
